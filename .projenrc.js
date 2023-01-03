@@ -1,8 +1,5 @@
 const { awscdk, github } = require('projen');
-const {
-  NpmAccess,
-  NodePackageManager,
-} = require('projen/lib/javascript');
+const { NpmAccess } = require('projen/lib/javascript');
 
 const cdkVersion = '2.58.1';
 
@@ -35,7 +32,6 @@ const project = new awscdk.AwsCdkConstructLibrary({
   ],
   minNodeVersion: '18.0.0',
   workflowNodeVersion: '18.12.1',
-  packageManager: NodePackageManager.NPM,
   // deps: [],                /* Runtime dependencies of this module. */
   // description: undefined,  /* The description is just a string that helps people understand the purpose of the package. */
   // devDeps: [],             /* Build dependencies for this module. */
