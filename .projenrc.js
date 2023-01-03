@@ -30,6 +30,8 @@ const project = new awscdk.AwsCdkConstructLibrary({
   devDeps: [
     '@types/js-nacl',
   ],
+  minNodeVersion: '18.0.0',
+  workflowNodeVersion: '18.12.1',
   // deps: [],                /* Runtime dependencies of this module. */
   // description: undefined,  /* The description is just a string that helps people understand the purpose of the package. */
   // devDeps: [],             /* Build dependencies for this module. */
