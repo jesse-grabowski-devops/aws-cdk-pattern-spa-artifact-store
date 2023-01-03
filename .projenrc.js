@@ -18,6 +18,18 @@ const project = new awscdk.AwsCdkConstructLibrary({
   githubOptions: {
     projenCredentials: github.GithubCredentials.fromApp({}),
   },
+  lambdaOptions: {
+    runtime: awscdk.LambdaRuntime.NODEJS_18_X,
+  },
+  deps: [
+    'aws-sdk',
+    'js-nacl',
+    '@octokit/core',
+    '@octokit/plugin-rest-endpoint-methods',
+  ],
+  devDeps: [
+    '@types/js-nacl',
+  ],
   // deps: [],                /* Runtime dependencies of this module. */
   // description: undefined,  /* The description is just a string that helps people understand the purpose of the package. */
   // devDeps: [],             /* Build dependencies for this module. */
