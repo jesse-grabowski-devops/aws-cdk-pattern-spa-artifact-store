@@ -3,9 +3,8 @@ import { Octokit } from '@octokit/core';
 import { restEndpointMethods } from '@octokit/plugin-rest-endpoint-methods';
 import { SecretsManager } from 'aws-sdk';
 import { instantiate as instantiateNacl } from 'js-nacl';
-import { GithubRepository } from './helpers';
-
-export * from './helpers';
+import { GithubRepository } from './index';
+import { type } from 'os';
 
 /*
  * Envars
@@ -82,10 +81,14 @@ async function setSecret(secretManager: SecretsManager, SecretId: string) {
     throw new Error('ACCESS_KEY_ID is not set');
   }
   const accessKeySecret = await secretManager.getSecretValue({ SecretId }).promise();
-  if (typeof accessKeySecret === 'undefined') {
+  if (typeof accessKeySecret === 'undefined' || typeof accessKeySecret.SecretString === 'undefined') {
     throw new Error('Secret not found');
   }
-  const repos = <GithubRepository[]> JSON.parse(process.env.GITHUB_REPOSITORIES);
+  const reposStr = process.env.GITHUB_REPOSITORIES;
+  if (typeof reposStr === 'undefined') {
+    throw new Error('GITHUB_REPOSITORIES is not set');
+  }
+  const repos = <GithubRepository[]> JSON.parse(reposStr);
 
   const patArn = process.env.GITHUB_PAT_ARN;
   if (typeof patArn === 'undefined') {
@@ -131,17 +134,16 @@ async function finishSecret(secretManager: SecretsManager, SecretId: string, Cli
   if (typeof metadata.VersionIdsToStages === 'undefined') {
     throw new Error('No versions found');
   }
-  const version = Object.keys(metadata.VersionIdsToStages).find((v) => metadata.VersionIdsToStages[v].includes('AWSCURRENT'));
-  if (version !== ClientRequestToken) {
-    return secretManager.updateSecretVersionStage({
-      SecretId,
-      VersionStage: 'AWSCURRENT',
-      MoveToVersionId: ClientRequestToken,
-      RemoveFromVersionId: version,
-    });
-  } else {
-    return Promise.resolve();
+  for (const version of Object.keys(metadata.VersionIdsToStages)) {
+    const stages = metadata.VersionIdsToStages[version];
+    if (typeof stages === 'undefined') {
+      continue;
+    }
+    if (stages.includes('AWSCURRENT') && version !== ClientRequestToken) {
+      return secretManager.updateSecretVersionStage({ SecretId, VersionStage: 'AWSPREVIOUS', MoveToVersionId: version, RemoveFromVersionId: ClientRequestToken }).promise();
+    }
   }
+  return Promise.resolve();
 }
 
 interface Nacl {

@@ -2,8 +2,12 @@ import * as cdk from 'aws-cdk-lib';
 import { aws_iam, aws_s3, aws_secretsmanager } from 'aws-cdk-lib';
 import { IBucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
-import { GithubRepository } from './helpers';
 import { RotateSecretFunction } from './rotate-secret-function';
+
+export interface GithubRepository {
+  readonly owner: string;
+  readonly repo: string;
+}
 
 export interface SinglePageApplicationArtifactStoreProperties {
   readonly ciRepositories: GithubRepository[];
