@@ -20,6 +20,7 @@ export class SinglePageApplicationArtifactStore extends Construct {
 
   constructor(scope: Construct, id: string, props: SinglePageApplicationArtifactStoreProperties) {
     super(scope, id);
+    this.props = props;
 
     const artifactWriterGroup = new aws_iam.Group(this, 'artifactStoreWriters');
 

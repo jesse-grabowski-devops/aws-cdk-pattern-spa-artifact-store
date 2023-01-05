@@ -5,6 +5,8 @@ import { SecretsManager } from 'aws-sdk';
 import { instantiate as instantiateNacl } from 'js-nacl';
 import { GithubRepository } from './helpers';
 
+export * from './helpers';
+
 /*
  * Envars
  *
@@ -31,6 +33,9 @@ export async function handler(event: any) {
   }
 
   const versions = metadata.VersionIdsToStages;
+  if (typeof versions === 'undefined') {
+    throw new Error('No versions found');
+  }
   if (!(ClientRequestToken in versions)) {
     throw new Error(`Secret version ${ClientRequestToken} has no stage for rotation of secret ${SecretId}.`);
   }
@@ -44,9 +49,9 @@ export async function handler(event: any) {
     case 'createSecret':
       return createSecret(secretManager, SecretId, ClientRequestToken);
     case 'setSecret':
-      return setSecret(secretManager, SecretId, ClientRequestToken);
+      return setSecret(secretManager, SecretId);
     case 'testSecret':
-      return testSecret(secretManager, SecretId, ClientRequestToken);
+      return Promise.resolve();
     case 'finishSecret':
       return finishSecret(secretManager, SecretId, ClientRequestToken);
     default:
@@ -68,10 +73,18 @@ async function createSecret(secretManager: SecretsManager, SecretId: string, Cli
       throw e;
     }
   }
+  return Promise.resolve();
 }
 
-async function setSecret(secretManager: SecretsManager, SecretId: string, ClientRequestToken: string) {
+async function setSecret(secretManager: SecretsManager, SecretId: string) {
+  const accessKeyId = process.env.ACCESS_KEY_ID;
+  if (typeof accessKeyId === 'undefined') {
+    throw new Error('ACCESS_KEY_ID is not set');
+  }
   const accessKeySecret = await secretManager.getSecretValue({ SecretId }).promise();
+  if (typeof accessKeySecret === 'undefined') {
+    throw new Error('Secret not found');
+  }
   const repos = <GithubRepository[]> JSON.parse(process.env.GITHUB_REPOSITORIES);
 
   const patArn = process.env.GITHUB_PAT_ARN;
@@ -90,7 +103,7 @@ async function setSecret(secretManager: SecretsManager, SecretId: string, Client
     const key = await octokit.rest.actions.getRepoPublicKey({ ... repo });
     const keyBytes = Buffer.from(key.data.key, 'base64');
 
-    const accessKeyIdBytes = Buffer.from(process.env.ACCESS_KEY_ID);
+    const accessKeyIdBytes = Buffer.from(accessKeyId);
     const encryptedAccessKeyId = nacl.crypto_box_seal(accessKeyIdBytes, keyBytes);
     const base64EncryptedAccessKeyId = Buffer.from(encryptedAccessKeyId).toString('base64');
     await octokit.rest.actions.createOrUpdateRepoSecret({
@@ -112,13 +125,12 @@ async function setSecret(secretManager: SecretsManager, SecretId: string, Client
   }
 }
 
-async function testSecret(secretManager: SecretsManager, SecretId: string, ClientRequestToken: string) {
-  // do nothing
-}
-
 async function finishSecret(secretManager: SecretsManager, SecretId: string, ClientRequestToken: string) {
   const metadata = await secretManager.describeSecret({ SecretId }).promise();
   // iterate over metadata.VersionIdsToStage for AWSCURRENT
+  if (typeof metadata.VersionIdsToStages === 'undefined') {
+    throw new Error('No versions found');
+  }
   const version = Object.keys(metadata.VersionIdsToStages).find((v) => metadata.VersionIdsToStages[v].includes('AWSCURRENT'));
   if (version !== ClientRequestToken) {
     return secretManager.updateSecretVersionStage({
@@ -127,6 +139,8 @@ async function finishSecret(secretManager: SecretsManager, SecretId: string, Cli
       MoveToVersionId: ClientRequestToken,
       RemoveFromVersionId: version,
     });
+  } else {
+    return Promise.resolve();
   }
 }
 
