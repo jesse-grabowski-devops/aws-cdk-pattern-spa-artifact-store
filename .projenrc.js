@@ -21,14 +21,12 @@ const project = new awscdk.AwsCdkConstructLibrary({
   lambdaOptions: {
     runtime: awscdk.LambdaRuntime.NODEJS_18_X,
   },
-  deps: [
-    'aws-sdk',
-    'js-nacl',
-  ],
   devDeps: [
     '@types/js-nacl',
   ],
   bundledDeps: [
+    'aws-sdk',
+    'js-nacl',
     '@octokit/core',
     '@octokit/plugin-rest-endpoint-methods',
   ],

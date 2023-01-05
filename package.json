@@ -75,7 +75,9 @@
   },
   "bundledDependencies": [
     "@octokit/core",
-    "@octokit/plugin-rest-endpoint-methods"
+    "@octokit/plugin-rest-endpoint-methods",
+    "aws-sdk",
+    "js-nacl"
   ],
   "keywords": [
     "cdk"
