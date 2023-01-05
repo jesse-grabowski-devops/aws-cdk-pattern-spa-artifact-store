@@ -73,6 +73,10 @@
     "aws-sdk": "^2.1288.0",
     "js-nacl": "^1.4.0"
   },
+  "bundledDependencies": [
+    "@octokit/core",
+    "@octokit/plugin-rest-endpoint-methods"
+  ],
   "keywords": [
     "cdk"
   ],

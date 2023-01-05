@@ -24,11 +24,13 @@ const project = new awscdk.AwsCdkConstructLibrary({
   deps: [
     'aws-sdk',
     'js-nacl',
-    '@octokit/core',
-    '@octokit/plugin-rest-endpoint-methods',
   ],
   devDeps: [
     '@types/js-nacl',
+  ],
+  bundledDeps: [
+    '@octokit/core',
+    '@octokit/plugin-rest-endpoint-methods',
   ],
   minNodeVersion: '18.0.0',
   workflowNodeVersion: '18.12.1',
