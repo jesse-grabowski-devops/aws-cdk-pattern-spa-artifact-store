@@ -4,7 +4,6 @@ import { restEndpointMethods } from '@octokit/plugin-rest-endpoint-methods';
 import { SecretsManager } from 'aws-sdk';
 import { instantiate as instantiateNacl } from 'js-nacl';
 import { GithubRepository } from './index';
-import { type } from 'os';
 
 /*
  * Envars
