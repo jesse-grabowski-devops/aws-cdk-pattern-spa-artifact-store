@@ -147,7 +147,7 @@
         "devDependencies": [
           "**/test/**",
           "**/build-tools/**",
-          "src/rotate-secret.lambda.ts"
+          "src\\rotate-secret.lambda.ts"
         ],
         "optionalDependencies": false,
         "peerDependencies": true
