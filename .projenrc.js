@@ -18,9 +18,7 @@ const project = new awscdk.AwsCdkConstructLibrary({
   githubOptions: {
     projenCredentials: github.GithubCredentials.fromApp({}),
   },
-  lambdaOptions: {
-    runtime: awscdk.LambdaRuntime.NODEJS_18_X,
-  },
+  lambdaAutoDiscover: false,
   deps: [
     'aws-sdk',
     'js-nacl',
@@ -36,6 +34,14 @@ const project = new awscdk.AwsCdkConstructLibrary({
   // description: undefined,  /* The description is just a string that helps people understand the purpose of the package. */
   // devDeps: [],             /* Build dependencies for this module. */
   // packageName: undefined,  /* The "name" in package.json. */
+});
+
+new awscdk.LambdaFunction(project, {
+  entrypoint: 'src/rotate-secret.lambda.ts',
+  runtime: awscdk.LambdaRuntime.NODEJS_16_X,
+  cdkDeps: {
+    cdkVersion: cdkVersion,
+  },
 });
 
 project.synth();
