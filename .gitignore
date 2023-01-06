@@ -52,4 +52,4 @@ junit.xml
 tsconfig.json
 !/API.md
 /assets/
-!/src\rotate-secret-function.ts
+!/src/rotate-secret-function.ts
